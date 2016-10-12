@@ -16,6 +16,7 @@
 	inputSelectMsg:			.asciiz "Selection: "
 	gameOverMsg:			.asciiz "############################################# GAME OVER ################################################\n"
 	helpMsg:			.asciiz "############################################### HELP ###################################################\n"
+	gamePlaceholder:		.asciiz "############################################ GAME RUNNING ##############################################\n"
 	instructionMsg1:		.asciiz "Lexathon is a word game where you must find as many words of four ore more letters in the alloted time."
 	instructionMsg2:		.asciiz "\nEach word must contain the central letter exactly once, while other tiles can be used no more than once."
 	instructionMsg3:		.asciiz "\nYou start each game with 60 seconds and finding a new word increases that time by 20 seconds."
@@ -24,11 +25,14 @@
 	instructionMsg6:		.asciiz "\n\t- You give up"
 	instructionMsg7:		.asciiz "\n\Scores are determined by both the percentage of words found and how quickly words are found."
 	instructionMsg8:		.asciiz "\nSo find as many words as you can, as quickly as you can."
-	instructionMsg9:		.asciiz "\n\t\t\t\tHAVE FUN!!!"
+	instructionMsg9:		.asciiz "\nHAVE FUN!!!"
 	instructionMsg10:		.asciiz "\nEnter any number to return: "
+	newLine:			.asciiz	"\n"
 	
 	# Variables for gameModule.asm
-	placeHolderMsg:			.asciiz ""
+	displayTime:			.asciiz "Time elapsed: "
+	timeOutMsg:			.asciiz	"\n############################################# ~TIME UP~ ################################################\n"
+	startTime:			.word	0
 
 # Text Segment
 .text										# Instructions follow this line
@@ -74,7 +78,18 @@
 		
 	# New game section
 	start:
-		jal	placeHolder							# Jump and Link to gameModule
+		li	$v0, 4
+		la	$a0, borderMsg
+		syscall
+		# Continued
+		la	$a0, gamePlaceholder
+		syscall
+		# Continued
+		la	$a0, borderMsg
+		syscall
+		jal	beginCountdown							# Start countdown timer
+	repeat:	jal	checkTime							# Retrieve remaining time
+		j	repeat
 		
 	# Display help instructions
 	help:
