@@ -30,7 +30,7 @@
 	newLine:			.asciiz	"\n"
 	
 	# Variables for gameModule.asm
-	displayTime:			.asciiz "Time elapsed: "
+	displayTime:			.asciiz "Time remaining: "
 	timeOutMsg:			.asciiz	"\n############################################# ~TIME UP~ ################################################\n"
 	startTime:			.word	0
 
