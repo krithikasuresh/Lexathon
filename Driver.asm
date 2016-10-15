@@ -16,7 +16,7 @@
 	inputSelectMsg:			.asciiz "Selection: "
 	gameOverMsg:			.asciiz "############################################# GAME OVER ################################################\n"
 	helpMsg:			.asciiz "############################################### HELP ###################################################\n"
-	gamePlaceholder:		.asciiz "############################################ GAME RUNNING ##############################################\n"
+	gameHeader:			.asciiz "############################################ GAME RUNNING ##############################################\n"
 	instructionMsg1:		.asciiz "Lexathon is a word game where you must find as many words of four ore more letters in the alloted time."
 	instructionMsg2:		.asciiz "\nEach word must contain the central letter exactly once, while other tiles can be used no more than once."
 	instructionMsg3:		.asciiz "\nYou start each game with 60 seconds and finding a new word increases that time by 20 seconds."
@@ -30,6 +30,8 @@
 	newLine:			.asciiz	"\n"
 	
 	# Variables for gameModule.asm
+	file:				.asciiz	"dictionary.txt"
+	buffer:				.space	1024
 	displayTime:			.asciiz "Time remaining: "
 	timeOutMsg:			.asciiz	"\n############################################# ~TIME UP~ ################################################\n"
 	startTime:			.word	0
@@ -43,12 +45,12 @@
 	# Indicates start of the code
 	main:
 		# Display boot message
-		li	$v0, 4								# Put service 4 into register $v0 which is used for print string
-		la	$a0, borderMsg							# Load address of bootMsg into $
-		syscall									# Read register $v0 for opcode, sees 4 and prints the string located in $a0
+		li	$v0, 4							# Put service 4 into register $v0 which is used for print string
+		la	$a0, borderMsg						# Load address of bootMsg into $
+		syscall								# Read register $v0 for opcode, sees 4 and prints the string located in $a0
 		# Continued
-		la	$a0, bootMsg							# Load address of bootMsg into $a0
-		syscall									# Read register $v0 for opcode, sees 4 and prints the string located in $a0
+		la	$a0, bootMsg						# Load address of bootMsg into $a0
+		syscall								# Read register $v0 for opcode, sees 4 and prints the string located in $a0
 		# Continued
 		la	$a0, borderMsg
 		syscall
@@ -68,13 +70,13 @@
 		la	$a0, inputSelectMsg
 		syscall
 		# Get user input
-		li	$v0, 5								# Put service 5 into register $v0 which is used to read integer
-		syscall									# Reads register $v0 for opcode, sees 5 and waits for integer input
+		li	$v0, 5							# Put service 5 into register $v0 which is used to read integer
+		syscall								# Reads register $v0 for opcode, sees 5 and waits for integer input
 		# Branch section
-		beq	$v0, 1, start							# Go to start if selection is 1 
-		beq	$v0, 2, help							# Go to help section if selection is 2
-		beq	$v0, 3, exit							# Exit game if selection is 3
-		j	exit								# Jump to exit label
+		beq	$v0, 1, start						# Go to start if selection is 1 
+		beq	$v0, 2, help						# Go to help section if selection is 2
+		beq	$v0, 3, exit						# Exit game if selection is 3
+		j	exit							# Jump to exit label
 		
 	# New game section
 	start:
@@ -82,14 +84,14 @@
 		la	$a0, borderMsg
 		syscall
 		# Continued
-		la	$a0, gamePlaceholder
+		la	$a0, gameHeader
 		syscall
 		# Continued
 		la	$a0, borderMsg
 		syscall
-		jal	beginCountdown							# Start countdown timer
-	repeat:	jal	checkTime							# Retrieve remaining time
-		j	repeat
+		jal	beginCountdown						# Start countdown timer
+		jal	checkTime						# Retrieve remaining time
+		jal	readFile	
 		
 	# Display help instructions
 	help:
