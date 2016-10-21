@@ -33,8 +33,10 @@
 	file:				.asciiz	"dictionary.txt"
 	buffer:				.space	1024
 	displayTime:			.asciiz "Time remaining: "
+	strMsg:				.asciiz	"Enter a string to search: " 
 	timeOutMsg:			.asciiz	"\n############################################# ~TIME UP~ ################################################\n"
 	startTime:			.word	0
+	inputStr:			.space 10
 
 # Text Segment
 .text										# Instructions follow this line
@@ -91,7 +93,7 @@
 		syscall
 		jal	beginCountdown						# Start countdown timer
 		jal	checkTime						# Retrieve remaining time
-		jal	readFile	
+		jal	readFile						# Read dictionary file
 		
 	# Display help instructions
 	help:
@@ -137,7 +139,7 @@
 		# Branch section
 		li 	$v0, 5
 		syscall
-		bne	$v0, -1, main
+		bne	$v0, -498632, main
 	
 	exit:
 		# Display Game over
