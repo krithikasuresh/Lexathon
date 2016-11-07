@@ -47,13 +47,15 @@ readFile:
 	syscall	
 	
 	# Search file for string
-	li	$v0, 4
+in:	li	$v0, 4
 	la 	$a0, strMsg
 	syscall
 	li	$v0, 8
 	la	$a0, inputStr
 	li	$a1, 10
 	syscall
+	jal	checkTime
+	j	in
 
 timeOut:
 	li	$v0, 4
