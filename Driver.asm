@@ -35,6 +35,7 @@
 	displayTime:			.asciiz "Time remaining: "
 	timeOutMsg:			.asciiz	"\n############################################# ~TIME UP~ ################################################\n"
 	startTime:			.word	0
+	inputStr:			.space 10
 	
 	#Buffer actually needs 1,135,342 characters for space for wordlist
 	
