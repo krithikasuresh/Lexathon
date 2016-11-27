@@ -50,23 +50,28 @@ readFile:
 	move	$a1, $0						# $a1 = flags = O_RDONLY = 0
 	move	$a2, $0						# $a2 = mode = 0 (reading)
 	syscall
-	move	$s2, $v0					# Store fd in $s2
+	move	$s2, $v0					# Store fd in $s2	
 	# Read from file, storing in buffer
 	li	$v0, 14						# 14 = read from  file
 	move	$a0, $s2					# move fd to $a0
 	la	$a1, buffer					# buffer to hold input
 	li	$a2, 1024					# Read 1024 bytes max
 	syscall
-	# Print file contents
-	li	$v0, 4	
-	la	$a0, buffer		
-	syscall				
-done:
 	# Close file
 	li	$v0, 16						# 16 = close file
 	add	$a0, $s2, $0	
-	syscall		
-	j	exit
+	syscall	
+	
+	# Search file for string
+in:	li	$v0, 4
+	la 	$a0, strMsg
+	syscall
+	li	$v0, 8
+	la	$a0, inputStr
+	li	$a1, 10
+	syscall
+	jal	checkTime
+	j	in
 
 timeOut:
 	li	$v0, 4
