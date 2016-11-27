@@ -27,6 +27,22 @@ checkTime:
 	syscall
 	jr	$ra
 	
+userInput: 
+	#Read user input
+	li $v0, 8
+	la $a0, strBuffer
+	li $a1, 11						# max 9 characters
+	syscall
+
+	j validateStr 
+
+printInput:
+	#Print result string
+	li $v0, 4
+	la $a0, strBuffer
+	syscall
+	jr 	$ra
+	
 readFile:
 	# Open File
 	li	$v0, 13						# Open file
@@ -57,3 +73,4 @@ timeOut:
 	la	$a0, timeOutMsg
 	syscall
 	j	exit
+	

@@ -17,7 +17,7 @@
 	gameOverMsg:			.asciiz "############################################# GAME OVER ################################################\n"
 	helpMsg:			.asciiz "############################################### HELP ###################################################\n"
 	gameHeader:			.asciiz "############################################ GAME RUNNING ##############################################\n"
-	instructionMsg1:		.asciiz "Lexathon is a word game where you must find as many words of four ore more letters in the alloted time."
+	instructionMsg1:		.asciiz "Lexathon is a word game where you must find as many words of four or more letters in the alloted time."
 	instructionMsg2:		.asciiz "\nEach word must contain the central letter exactly once, while other tiles can be used no more than once."
 	instructionMsg3:		.asciiz "\nYou start each game with 60 seconds and finding a new word increases that time by 20 seconds."
 	instructionMsg4:		.asciiz "\nThe game ends when either:"
@@ -30,17 +30,25 @@
 	newLine:			.asciiz	"\n"
 	
 	# Variables for gameModule.asm
-	file:				.asciiz	"dictionary.txt"
+	file:				.asciiz	"testwordlist.txt"
 	buffer:				.space	1024
 	displayTime:			.asciiz "Time remaining: "
 	timeOutMsg:			.asciiz	"\n############################################# ~TIME UP~ ################################################\n"
 	startTime:			.word	0
+	
+	#Buffer actually needs 1,135,342 characters for space for wordlist
+	
+	#Variables for UserInput
+	strBuffer: 			.space 11
+	exitStr:			.asciiz "X\n"
+	newLineStr:			.asciiz "\n"
 
 # Text Segment
 .text										# Instructions follow this line
 .globl main									# main symbol will be accessible from outside current file
 	# Prepocessing section ~ Following user header files are included ~
 	.include "gameModule.asm"
+	.include "validationModule.asm"
 
 	# Indicates start of the code
 	main:
@@ -90,6 +98,7 @@
 		la	$a0, borderMsg
 		syscall
 		jal	beginCountdown						# Start countdown timer
+		jal	userInput						# Gets user input
 		jal	checkTime						# Retrieve remaining time
 		jal	readFile	
 		
@@ -153,3 +162,4 @@
 		# Exit call
 		li	$v0, 10								
 		syscall
+		
