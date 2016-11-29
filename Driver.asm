@@ -31,19 +31,25 @@
 	
 	# Variables for gameModule.asm
 	file:				.asciiz	"testwordlist.txt"
+	nineFile:			.asciiz "testfile.txt"
+	nineBuffer:			.space  71
 	buffer:				.space	1024
 	displayTime:			.asciiz "Time remaining: "
 	timeOutMsg:			.asciiz	"\n############################################# ~TIME UP~ ################################################\n"
 	startTime:			.word	0
 	inputStr:			.space 10
-	
+	displayWord:			.space 9
+	readErrorMsg: 			.asciiz "\nError in reading file.\n"
+	emptyString: 			.asciiz "\n\n"
+	endFileRead:			.asciiz "\nEnd of file read"
+	inputPrompt:			.asciiz "\nEnter a word: "
 	#Buffer actually needs 1,135,342 characters for space for wordlist
 	
 	#Variables for UserInput
-	strBuffer: 			.space 11
+	strBuffer: 			.space 15
 	exitStr:			.asciiz "X\n"
 	newLineStr:			.asciiz "\n"
-
+	
 # Text Segment
 .text										# Instructions follow this line
 .globl main									# main symbol will be accessible from outside current file
@@ -98,10 +104,11 @@
 		# Continued
 		la	$a0, borderMsg
 		syscall
+		
 		jal	beginCountdown						# Start countdown timer
 		jal	userInput						# Gets user input
 		jal	checkTime						# Retrieve remaining time
-		jal	readFile	
+		j	getDisplayWord	
 		
 	# Display help instructions
 	help:
