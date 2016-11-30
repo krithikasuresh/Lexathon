@@ -1,7 +1,10 @@
 # Program: validationModule.asm
+
+#$s2 = STRING LENGTH
+
 #---------------------------------------------------------------------------#
 validateStrLength: 
-	la $a0, strBuffer		#pass address of user input
+	la $a0, inputBuffer		#pass address of user input
 	la $a1, exitStr			#pass address of 'X' exit string
 	la $a2, newLineStr		#pass address of newLine string
 	
@@ -73,15 +76,24 @@ convertStrToUpper:
 		j convBegin
 	
 validEnd:
-	j printInput
+	addi $t0, $zero, 0
+	add $t1, $zero, $s2
 	
-
-#--------------------------------------------------------------------------------------------#
-
+	la $t4, inputStr
+	la $t3, inputBuffer
 	
+storeInputStr:
+	beq $t0, $t1, printInput
+	lb $t4, inputBuffer($t0)
+	sb $t4, inputStr($t0)
+	beq $t4, 0, printInput
+	
+	addi $t0, $t0, 1
+	
+	j storeInputStr
 
+#----------------------------Check Against Dictionary----------------------------------------#
 
-#----------------------------Valid Against Dictionary----------------------------------------#
-
-
-
+AgainstDict:
+	
+	

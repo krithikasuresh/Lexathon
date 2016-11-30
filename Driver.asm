@@ -35,22 +35,19 @@
 	vertLine:			.asciiz "|"
 	
 	# Variables for gameModule.asm
-	file:				.asciiz	"testwordlist.txt"
 	nineFile:			.asciiz "testfile.txt"
 	nineBuffer:			.space  71
-	buffer:				.space	1024
 	displayTime:			.asciiz "Time remaining: "
 	timeOutMsg:			.asciiz	"\n############################################# ~TIME UP~ ################################################\n"
 	startTime:			.word	0
-	inputStr:			.space 10
 	displayWord:			.space 10
 	readErrorMsg: 			.asciiz "\nError in reading file.\n"
 	endFileRead:			.asciiz "\nEnd of file read"
-	inputPrompt:			.asciiz "\nEnter a word: "
-	#Buffer actually needs 1,135,342 characters for space for wordlist
 	
 	# Variables for UserInput
-	strBuffer: 			.space 15
+	inputStr:			.space 10
+	inputPrompt:			.asciiz "\nEnter a word: "
+	inputBuffer: 			.space 15
 	exitStr:			.asciiz "X\n"
 	shuffleStr:			.asciiz "S\n"
 	shuffling:			.asciiz "\nShuffling!!!\n"
@@ -62,6 +59,7 @@
 	# Prepocessing section ~ Following user header files are included ~
 	.include "gameModule.asm"
 	.include "validationModule.asm"
+	.include "timerAndPointModule.asm"
 
 	# Indicates start of the code
 	main:
