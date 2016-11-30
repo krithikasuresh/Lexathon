@@ -29,32 +29,11 @@ checkTime:
 	syscall
 	jr	$ra
 
-#--------------------------------------------------------------------------#
-
-userInput: 
-	#Prompt user input
-	li $v0, 4
-	la, $a0, inputPrompt
+timeOut:
+	li	$v0, 4
+	la	$a0, timeOutMsg
 	syscall
-	
-	#Read user input
-	li $v0, 8
-	la $a0, strBuffer
-	li $a1, 15						# max 9 characters
-	syscall
-
-	j validateStrLength 
-
-printInput:
-	#Print result string
-	li $v0, 4
-	la $a0, strBuffer
-	syscall
-	
-	li $v0, 1
-	move $a0, $s2			#$s2 holds string length
-	syscall
-	jr 	$ra
+	j	exit
 
 #-----------------------------------------------------------------------------#
 # The program creates a random number that represents a line in the file and
@@ -69,11 +48,8 @@ getDisplayWord:
 	li $v0, 42
 	syscall
 		
-	#add lower bound, and print the random integer
+	#add lower bound
 	add $a0, $a0, 0
-	#div $a0, $a0, 
-	li $v0, 1 
-	syscall	
 	
 	add $t1, $zero, $a0					# $t1 = holds random number for line in file
 	add $t0, $zero, $zero					# $t0 = counter for the line in the file
@@ -110,10 +86,6 @@ readNFile:
 	beq $t1, $t0, getNineWord
 	beq $a3, '*', printEndFile
 	
-#	li $v0, 4
-#	la $a0, emptyString
-#	syscall
-	
 	addi $t0, $t0, 1 					#increment counter
 	
 	j readNFile
@@ -124,18 +96,178 @@ readNFile:
 #	la	$a0, buffer		
 #	syscall		
 
+getNineWord:
+	#401442 characters total in the file minus 9 characters
+	#Print what is read in the file
+#	li $v0, 4
+#	la $a0, nineBuffer
+#	syscall
+	
+	la $a1, displayWord
+	 
+	add $t1, $zero, $a0		#address of nineBuffer
+	addi $t0, $zero, 0		#counter = 0
+	addi $t2, $zero, 10		#loop ending variable = limit
+	addi $t4, $zero, 0
+	
+	li $a1, 6			#generate the random number with the max bound at $a1
+	li $v0, 42
+	syscall
+		
+	add $a0, $a0, 0			#add lower bound, and print the random integer
+	
+	mult $t2, $a0			#Find the nine letter word by multiplying the random number by 10
+	mflo $t3
+	
+	addi $t2, $t2, -2		#change counter limit to 8
+	
+	wordNLoop:
+		lbu $a1, nineBuffer($t3)	#take byte from the buffer
+		sb $a1, displayWord($t4)	#store byte from the buffer into displayWord
+		beq $t0, $t2, scramble		#once it hits the counter, go to scramble
+		addi $t3, $t3, 1		#increment address
+		addi $t4, $t4, 1		#increment address
+		addi $t0, $t0, 1		#add to counter
+		j wordNLoop
+	
+scramble:
+	#TEST: print word before scramble
+	li $v0, 4
+	la $a0, displayWord
+	syscall
+	
+	
+	addi $t0, $zero, 0			#zero $t0 = counter
+	addi $t1, $zero, 10			#$t1 = 10, limit of swapping
+	la $a1, displayWord
+	addi $t5, $a1, 0			#zero $t5, holds the array
+
+	startscramble:
+		beq $t0, $t1, printWord		#if counter equals limit, jump to print displayWord
+		#generate the random number with the max bound at $a1
+		li $a1, 8				
+		li $v0, 42
+		syscall
+		
+		#add lower bound, and print the random integer
+		add $a0, $a0, 1
+#		li $v0, 1 
+#		syscall	
+		
+		add $t3, $zero, $a0 			#$t3 = random number between 1 and 8
+		lb $t2, 0($t5)				#load first character to $t2
+		lb $t4, displayWord($t3)		#get character from random number in displayWord
+		addi $t6, $t4, 0			#temp register holds the random character
+		
+		sb $t2, displayWord($t3)		#store first byte into random num byte
+		sb $t6, 0($t5)				#store random num byte into first byte
+		
+		addi $t0, $t0, 1			#increment counter
+		j startscramble
+
+printWord:
+	li $v0, 4
+	la $a0, displayWord
+	syscall
+
+
+#------Display Grid-------------------#
+	li $t5,0		#clear register for index
+	li $t6,0		#clear register for array counter
+	j displayGrid
+		    
+displayGrid:
+
+	beq $t6, 0, formatNewline		#format newline and horizontal line
+	beq $t6, 3, formatNewline		#format newline and horizontal line
+	beq $t6, 6, formatNewline		#format newline and horizontal line
+	beq $t6, 9, formatNewline		#format newLIne and horizontal line
+	
+returnAgain:
+	beq $t6, 0, formatHorizline		#format newline and horizontal line
+	beq $t6, 3, formatHorizline		#format newline and horizontal line
+	beq $t6, 6, formatHorizline		#format newline and horizontal line
+	beq $t6, 9, formatHorizline		#format newLIne and horizontal line
+	
+	
+returnLabel:	
+	lb $a1, displayWord($t5)	#get first element
+	addi $t5, $t5, 1		#move to next element
+	
+	li $v0, 11			#printing letter
+	move $a0, $a1
+	syscall
+	
+	li $v0, 4			#print vertical format line
+	la $a0, vertLine
+	syscall
+	
+	addi $t6, $t6, 1		#counter to exit loop
+	beq $t6, 10, endDisplay		# exit for now , beq too useriput later
+	
+	j displayGrid			#continue iterating through letter
+	
+formatNewline:
+	
+	li $v0, 4
+	la $a0, emptyString
+	syscall
+	
+	#j returnLabel
+	j returnAgain
+	
+formatHorizline:
+	li $v0, 4
+	la $a0, horizLine
+	syscall
+	
+	#j returnAgain
+	j returnLabel	
+	
+endDisplay:
+	jr $ra
+	
+#---------------------------------------------------------------------------------#
+
+userInput: 
+	#Prompt user input
+	li $v0, 4
+	la, $a0, inputPrompt
+	syscall
+	
+	#Read user input
+	li $v0, 8
+	la $a0, strBuffer
+	li $a1, 15						# max 9 characters
+	syscall
+
+	j validateStrLength 
+
+printInput:
+	#Print result string
+	li $v0, 4
+	la $a0, strBuffer
+	syscall
+	
+	li $v0, 1
+	move $a0, $s2						#$s2 holds string length
+	syscall
+	jr 	$ra
+	
+	
+#--------------------------------------------------------------#
 printEndFile:
 	li $v0, 4
 	la $a0, endFileRead
 	syscall 
-	
 	j exit
 	
 closeFile:
 	li	$v0, 16						# 16 = close file
 	add	$a0, $s2, $0	
 	syscall	
-	j exit
+	
+	jr $ra
 		
 #readFile:
 #	# Open File
@@ -177,11 +309,7 @@ readError:
 	la $a0, readErrorMsg
 	li $v0, 4
 	syscall
+	
 	j exit
 
-timeOut:
-	li	$v0, 4
-	la	$a0, timeOutMsg
-	syscall
-	j	exit
 	

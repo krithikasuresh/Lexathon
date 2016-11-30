@@ -29,6 +29,11 @@
 	instructionMsg10:		.asciiz "\nEnter any number to return: "
 	newLine:			.asciiz	"\n"
 	
+	# Variables for displayGrid
+	emptyString: 			.asciiz "\n"
+	horizLine:			.asciiz "------\n"
+	vertLine:			.asciiz "|"
+	
 	# Variables for gameModule.asm
 	file:				.asciiz	"testwordlist.txt"
 	nineFile:			.asciiz "testfile.txt"
@@ -38,16 +43,17 @@
 	timeOutMsg:			.asciiz	"\n############################################# ~TIME UP~ ################################################\n"
 	startTime:			.word	0
 	inputStr:			.space 10
-	displayWord:			.space 9
+	displayWord:			.space 10
 	readErrorMsg: 			.asciiz "\nError in reading file.\n"
-	emptyString: 			.asciiz "\n\n"
 	endFileRead:			.asciiz "\nEnd of file read"
 	inputPrompt:			.asciiz "\nEnter a word: "
 	#Buffer actually needs 1,135,342 characters for space for wordlist
 	
-	#Variables for UserInput
+	# Variables for UserInput
 	strBuffer: 			.space 15
 	exitStr:			.asciiz "X\n"
+	shuffleStr:			.asciiz "S\n"
+	shuffling:			.asciiz "\nShuffling!!!\n"
 	newLineStr:			.asciiz "\n"
 	
 # Text Segment
@@ -93,7 +99,7 @@
 		beq	$v0, 3, exit						# Exit game if selection is 3
 		j	exit							# Jump to exit label
 		
-	# New game section
+#-------------------START-------------------------------------#
 	start:
 		li	$v0, 4
 		la	$a0, borderMsg
@@ -105,11 +111,14 @@
 		la	$a0, borderMsg
 		syscall
 		
+		jal	getDisplayWord	
 		jal	beginCountdown						# Start countdown timer
-		jal	userInput						# Gets user input
 		jal	checkTime						# Retrieve remaining time
-		j	getDisplayWord	
-		
+		jal	userInput						# Gets user input
+		j 	exit
+
+#----------------------------------------------------------------------#
+
 	# Display help instructions
 	help:
 		li	$v0, 4

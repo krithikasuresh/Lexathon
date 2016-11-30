@@ -21,7 +21,7 @@ validateStrLength:
 		
 		isValidLength:
 			#check if string length is less than 4 characters
-			beq $s2, 1, compExitStr		#branch to check if the one character is the exit string = 'X'
+			beq $s2, 1, checkExitorShuffle		#branch to check if the one character is the exit string = 'X'
 			slti $t5, $s2, 4
 			beq $t5, 1, exit
 			
@@ -30,13 +30,28 @@ validateStrLength:
 			beq $t5, 1, exit
 			j convertStrToUpper
 	
-	compExitStr:
-		lb $t4, 0($t1)  	#strBuffer first char
-		lb $t5, 0($t2)		#exitStr = 'X'
-		beq $t4, $t5, exit	#if they are equal, exit program = Give Up Button
+checkExitorShuffle:
+	checkExit:
+		lb $t4, 0($t1)  			#strBuffer first char
+		lb $t5, 0($t2)				#exitStr = 'X'
+		beq $t4, $t5, exit			#if they are equal, exit program = Give Up Button
+	
+	checkShuffle:
+		la $a1, shuffleStr			#pass address of shuffle string
+		lb $t2, 0($a1)				#set $t2 = shuffleStr = 'S'
+		#lb $t4, 0($t1)  			#strBuffer first char
+		lb $t5, 0($t2)				#shuffleStr = 'S'
+		beq $t4, $t5, shuffle			#if they are equal, shuffle
+	
+	shuffle:
+		li $v0, 4
+		la $a0, shuffling
+		syscall 
+		
+		j exit
 	
 convertStrToUpper: 
-	li $t0, 0 	#$t0 = 0, counter
+	li $t0, 0 					#$t0 = 0, counter
 	
 	convBegin:
 		slti $t1, $t0, 11 		#$t1 = 1 if $t0 < 10
@@ -59,51 +74,14 @@ convertStrToUpper:
 	
 validEnd:
 	j printInput
+	
 
-#----------------------------------------------------------------------------------#
+#--------------------------------------------------------------------------------------------#
 
-getNineWord:
-	#401442 characters total in the file minus 9 characters
-	#Print what is read in the file
-	li $v0, 4
-	la $a0, nineBuffer
-	syscall
 	
-	la $a1, displayWord
-	 
-	add $t1, $zero, $a0		#address of nineBuffer
-	addi $t0, $zero, 0		#counter = 0
-	addi $t2, $zero, 10		#loop ending variable = limit
-	addi $t4, $zero, 0
-	
-	li $a1, 6			#generate the random number with the max bound at $a1
-	li $v0, 42
-	syscall
-		
-	add $a0, $a0, 0			#add lower bound, and print the random integer
-	li $v0, 1 
-	syscall
-	
-	mult $t2, $a0			#Find the nine letter word by multiplying the random number by 10
-	mflo $t3
-	
-	addi $t2, $t2, -2		#change counter limit to 8
-	
-	wordNLoop:
-		lbu $a1, nineBuffer($t3)	#take byte from the buffer
-		sb $a1, displayWord($t4)	#store byte from the buffer into displayWord
-		beq $t0, $t2, printWord		#once it hits the counter, go to print word
-		addi $t3, $t3, 1		#increment address
-		addi $t4, $t4, 1		#increment address
-		addi $t0, $t0, 1		#add to counter
-		j wordNLoop
-		
-printWord:
-	li $v0, 4
-	la $a0, displayWord
-	syscall
-	
-	j closeFile
-		
-		
-#---------------------------------------------------------------------------------#
+
+
+#----------------------------Valid Against Dictionary----------------------------------------#
+
+
+
