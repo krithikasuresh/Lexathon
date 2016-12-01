@@ -1,11 +1,14 @@
 # Program: timerAndPointModule.asm
-#---------------------------#
+# $s0, and $s1 : timer
+# $s4 = points
+#-----------------------------------------------------------------------#
 
 beginCountdown:
 	li	$s1, 60						# Initialize s1 to hold 60s
 	li	$v0, 30						# Get time of countdown start
 	syscall
 	sw	$a0, startTime					# Store start time
+	
 	jr	$ra
 
 checkTime:
@@ -27,11 +30,36 @@ checkTime:
 	la	$a0, newLine
 	syscall
 	jr	$ra
+	
+
+addTime:
+	#Add 20 into register holding time left
+	add $s1, $s1, 20
+	jr $ra
 
 timeOut:
 	li	$v0, 4
 	la	$a0, timeOutMsg
 	syscall
 	j	exit
+
+#-----------------------------------------------------------------------------#
+
+addPoints:
+	#Add 2 points per character in word
+	addi $t0, $0, 2
+	mult $s2, $t0
+	mflo $s5
 	
+	add $s4, $s4, $s5
+	#Print total points
+	li $v0, 4
+	la $a0, pointTotal
+	syscall
 	
+	#Print the number of points from register $s4
+	li $v0, 1
+	add $a0, $s4, $0
+	syscall
+	
+	jr $ra

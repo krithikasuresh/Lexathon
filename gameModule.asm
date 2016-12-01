@@ -9,12 +9,13 @@
 getDisplayWord:
 	
 	#generate the random number with the max bound at $a1
-	li $a1, 2		#CHANGE TO 5819 		
+	li $a1, 1#CHANGE THIS!!!!!!!!!!!!1111111
 	li $v0, 42
 	syscall
 		
-	#add lower bound
+	#add lower bound 
 	add $a0, $a0, 0
+	li $v0, 1 
 	
 	add $t1, $zero, $a0					# $t1 = holds random number for line in file
 	add $t0, $zero, $zero					# $t0 = counter for the line in the file
@@ -27,25 +28,18 @@ getNineLetterFile:
 	move	$a2, $0						# $a2 = mode = 0 (reading)
 	syscall
 	
-	move	$s2, $v0					# Store fd in $s2
+	move	$s3, $v0					# Store fd in $s3
 
 readNFile: 	
 	# Read from file, storing in buffer
 	li	$v0, 14						# 14 = read from  file
-	move	$a0, $s2					# move fd to $a0
+	move	$a0, $s3					# move fd to $a0
 	la	$a1, nineBuffer					# buffer to hold input
-	li	$a2, 71						# Read 401451 bytes max
+	li	$a2, 71						# 
 	syscall
 	
 	bltz $v0, readError
-	
-#	#Print what is read in the file
-#	li $v0, 4
-#	la $a0, nineBuffer
-#	syscall
-	
-	move $s3, $a0
-	
+
 	xor $a0, $a0, $a0
 	lbu $a3, nineBuffer($a0)
 	beq $t1, $t0, getNineWord
@@ -54,20 +48,9 @@ readNFile:
 	addi $t0, $t0, 1 					#increment counter
 	
 	j readNFile
-	#j getNineWord
-	
-#	# Print file contents
-#	li	$v0, 4	
-#	la	$a0, buffer		
-#	syscall		
 
 getNineWord:
-	#401442 characters total in the file minus 9 characters
-	#Print what is read in the file
-#	li $v0, 4
-#	la $a0, nineBuffer
-#	syscall
-	
+
 	la $a1, displayWord
 	 
 	add $t1, $zero, $a0		#address of nineBuffer
@@ -96,11 +79,11 @@ getNineWord:
 		j wordNLoop
 	
 scramble:
-	#TEST: print word before scramble
-	li $v0, 4
-	la $a0, displayWord
-	syscall
-	
+
+	#close file
+	li	$v0, 16						# 16 = close file
+	add	$a0, $s3, $0	
+	syscall	
 	
 	addi $t0, $zero, 0			#zero $t0 = counter
 	addi $t1, $zero, 10			#$t1 = 10, limit of swapping
@@ -108,16 +91,15 @@ scramble:
 	addi $t5, $a1, 0			#zero $t5, holds the array
 
 	startscramble:
-		beq $t0, $t1, printWord		#if counter equals limit, jump to print displayWord
+		beq $t0, $t1, beginDisplayGrid		#if counter equals limit, jump to print display
 		#generate the random number with the max bound at $a1
 		li $a1, 8				
 		li $v0, 42
 		syscall
 		
-		#add lower bound, and print the random integer
+		#add lower bound
 		add $a0, $a0, 1
-#		li $v0, 1 
-#		syscall	
+		li $v0, 1 
 		
 		add $t3, $zero, $a0 			#$t3 = random number between 1 and 8
 		lb $t2, 0($t5)				#load first character to $t2
@@ -130,13 +112,9 @@ scramble:
 		addi $t0, $t0, 1			#increment counter
 		j startscramble
 
-printWord:
-	li $v0, 4
-	la $a0, displayWord
-	syscall
-
 
 #------Display Grid-------------------#
+beginDisplayGrid:
 	li $t5,0		#clear register for index
 	li $t6,0		#clear register for array counter
 	j displayGrid
@@ -207,70 +185,22 @@ userInput:
 	syscall
 
 	j validateStrLength 
-
-printInput:
-	#Print result string
-	li $v0, 4
-	la $a0, inputStr
-	syscall
-	
-	li $v0, 1
-	move $a0, $s2						#$s2 holds string length
-	syscall
-	
-	jr 	$ra
-	
 	
 #--------------------------------------------------------------#
 printEndFile:
 	li $v0, 4
 	la $a0, endFileRead
 	syscall 
+	
 	j exit
 	
 closeFile:
 	li	$v0, 16						# 16 = close file
-	add	$a0, $s2, $0	
+	add	$a0, $s3, $0	
 	syscall	
 	
 	jr $ra
 		
-#readFile:
-#	# Open File
-#	li	$v0, 13						# Open file
-#	la	$a0, file					# $a0 = name of file to read
-#	move	$a1, $0						# $a1 = flags = O_RDONLY = 0
-#	move	$a2, $0						# $a2 = mode = 0 (reading)
-#	syscall
-#	move	$s2, $v0					# Store fd in $s2	
-#	# Read from file, storing in buffer
-#	li	$v0, 14						# 14 = read from  file
-#	move	$a0, $s2					# move fd to $a0
-#	la	$a1, buffer					# buffer to hold input
-#	li	$a2, 1024					# Read 1024 bytes max
-#	syscall
-	
-#	# Print file contents
-#	li	$v0, 4	
-#	la	$a0, buffer		
-#	syscall		
-	
-	# Close file
-#	li	$v0, 16						# 16 = close file
-#	add	$a0, $s2, $0	
-#	syscall	
-	
-	# Search file for string
-#in:	li	$v0, 4
-#	la 	$a0, strMsg
-#	syscall
-#	li	$v0, 8
-#	la	$a0, inputStr
-#	li	$a1, 10
-#	syscall
-#	jal	checkTime
-#	j	in
-
 readError:
 	la $a0, readErrorMsg
 	li $v0, 4
