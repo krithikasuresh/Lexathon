@@ -8,7 +8,7 @@
 
 againstDict:
 	
-	#Print that I'm in dictionary
+	#Print that I'm checking dictionary
 	li $v0, 4
 	la $a0, inDictStr
 	syscall
@@ -22,10 +22,34 @@ checkMiddleChar:
 	
 	loopM:
 		lb $t2, inputStr($t0)			#load each character of the input string
-		beq $t2, $t1, checkInputStrDict		#if the middle character is used, check against dictionary
+		beq $t2, $t1, checkPreviousWords	#if the middle character is used, check against dictionary
 		beq $t2, 0, invalidWord			#if it gets to the end of the string, then output invalid word because they did not use the middle character
 		addi $t0, $t0, 1
 		j loopM
+	
+checkPreviousWords:
+	#Check if the word has already been used
+	#Preprocessing
+	addi $t0, $zero, 0		# $t0 = 0 counter
+	addi $t1, $0, 0			#counter for correct letters
+	addi $t2, $s2, 0		#string length
+	addi $t3, $0, 0			#holds byte from array
+	
+	start1:
+		lb $t3, inputStr($t1)			
+		lb $t4, prevWords($t0)
+		beq $t2, $t1, invalidWord
+		beq $t3, $t4, increment1
+		beq $t0, $s7, checkInputStrDict
+		addi $t1, $0, 0
+		addi $t0, $t0, 1
+		j start1
+		
+	increment1:
+		addi $t1, $t1, 1
+		addi $t0, $t0, 1
+		j start1
+	
 	
 checkInputStrDict:
 	
@@ -68,10 +92,6 @@ readFourFile:
 	
 	bltz $v0, readError
 	
-	#Print what is read in the file
-#	li $v0, 4
-#	la $a0, fourBuffer
-#	syscall
 	addi $sp, $sp, -4	#make room on the stack
 	sw $ra, 0($sp)		#store return address
 	jal checkFour
@@ -90,13 +110,13 @@ readFourFile:
 checkFour:
 	
 	start4:
-		lb $t3, inputStr($t1)			#takes the first character
-		lb $t4, fourBuffer($t0)
-		beq $t2, $t1, validWord
-		beq $t3, $t4, increment4
-		beq $t4, 0, return4
-		addi $t1, $0, 0
-		addi $t0, $t0, 1
+		lb $t3, inputStr($t1)			#load from inputStr
+		lb $t4, fourBuffer($t0)			#load from buffer
+		beq $t2, $t1, validWord			#if the counter equals the string length, branch to validWord
+		beq $t3, $t4, increment4		#if the characters are equal, add to correct letters count
+		beq $t4, 0, return4			#if it reaches the end of the buffer, go back to get the next line of the file
+		addi $t1, $0, 0				#the counter is reset to 0 since the characters did not match in a row
+		addi $t0, $t0, 1			#counter added for the buffer
 		j start4
 		
 	increment4:
@@ -129,10 +149,6 @@ readFiveFile:
 	
 	bltz $v0, readError
 	
-	#Print what is read in the file
-#	li $v0, 4
-#	la $a0, fourBuffer
-#	syscall
 	addi $sp, $sp, -4	#make room on the stack
 	sw $ra, 0($sp)		#store return address
 	jal checkFive
@@ -190,10 +206,6 @@ readSixFile:
 	
 	bltz $v0, readError
 	
-	#Print what is read in the file
-#	li $v0, 4
-#	la $a0, fourBuffer
-#	syscall
 	addi $sp, $sp, -4	#make room on the stack
 	sw $ra, 0($sp)		#store return address
 	jal checkSix
@@ -252,10 +264,6 @@ readSevenFile:
 	
 	bltz $v0, readError
 	
-	#Print what is read in the file
-#	li $v0, 4
-#	la $a0, fourBuffer
-#	syscall
 	addi $sp, $sp, -4	#make room on the stack
 	sw $ra, 0($sp)		#store return address
 	jal checkSeven
@@ -313,10 +321,6 @@ readEightFile:
 	
 	bltz $v0, readError
 	
-	#Print what is read in the file
-#	li $v0, 4
-#	la $a0, fourBuffer
-#	syscall
 	addi $sp, $sp, -4	#make room on the stack
 	sw $ra, 0($sp)		#store return address
 	jal checkEight
@@ -373,10 +377,6 @@ readNineFile:
 	
 	bltz $v0, readError
 	
-	#Print what is read in the file
-#	li $v0, 4
-#	la $a0, fourBuffer
-#	syscall
 	addi $sp, $sp, -4	#make room on the stack
 	sw $ra, 0($sp)		#store return address
 	jal checkNine

@@ -1,6 +1,6 @@
 # Program: validationModule.asm
 
-#$s2 = STRING LENGTH
+# $s2 = STRING LENGTH
 # validateStrLength checks whether the user input is valid, and if it is
 # converts it to all uppercase for checking against the dictionary. It
 # also checks that if the user inputs one character, then it will check 
@@ -101,7 +101,7 @@ convertStrToUpper:
 		beq $t1, $0, validEnd		#loop controller
 		lb $t4, 0($a0)			#load character of string
 		beqz $t4, validEnd		#if there are no more characters, end conversion
-		slti $t2, $t4, 97
+		slti $t2, $t4, 96
 		bne $t2, $t3, toUpper		#if it is not true, convert to upper
 		j convDone			#if it is already uppercase
 		
@@ -138,7 +138,8 @@ invalidWord:
 	addi $sp, $sp, -4	#make room on the stack
 	sw $ra, 0($sp)		#store return address
 	jal closeFile
-		
+	
+	# Print wrong word
 	li $v0, 4
 	la $a0, notAWord
 	syscall
@@ -156,6 +157,23 @@ validWord:
 	sw $ra, 0($sp)		#store return address
 	jal closeFile
 	
+	#Store the correct word in array, so that it can not be used again
+	# $s7 counter of array end of stored words for prevWords
+	addi $t2, $s2, 0		#string length
+	addi $t3, $0, 0			#holds byte from input string
+	addi $t1, $0, 0			#counter
+	
+	startStoreWord:
+		lb $t3, inputStr($t1)		#load character from input string	
+		sb $t3, prevWords($s7)		#store it into prevWords array
+		beq $t1, $t2, printValid	#once the entire string is stored go to show valid word screen
+		addi $s7, $s7, 1		#increment in prevWords
+		addi $t1, $t1, 1		#increment in string
+		j startStoreWord
+		
+
+printValid:
+	#Print
 	li $v0, 4
 	la $a0, isAWord
 	syscall

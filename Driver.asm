@@ -27,12 +27,14 @@
 	instructionMsg8:		.asciiz "\nSo find as many words as you can, as quickly as you can."
 	instructionMsg9:		.asciiz "\nHAVE FUN!!!"
 	instructionMsg10:		.asciiz "\nEnter any number to return: "
+	instructionMsg11:		.asciiz "\nType X to exit or S to shuffle."
 	newLine:			.asciiz	"\n"
 	
 	# Variables for displayGrid
 	emptyString: 			.asciiz "\n"
-	horizLine:			.asciiz "------\n"
+	horizLine:			.asciiz "\t---------\n"
 	vertLine:			.asciiz "|"
+	tabOver:			.asciiz "\t"
 	
 	# Variables for gameModule.asm
 	nineFile:			.asciiz "wordlistnine.txt"
@@ -52,12 +54,13 @@
 	exitStr:			.asciiz "X"
 	shuffleStr:			.asciiz "S"
 	newLineStr:			.asciiz "\n"
-	notAWord:			.asciiz "\nSorry, that is not correct.\n"
+	notAWord:			.asciiz "\nSorry, that is not correct. Not a word, not correct length, not with middle character or already inputted word.\n"
 	isAWord:			.asciiz "\nValid Word!\n"
 	
 	# Variables for Checking Dictionary
 	inDictStr:			.asciiz "\nChecking...."
 	afterDict:			.asciiz "\nAfter Dictionary!\n"
+	prevWords:			.space 5000
 	fourFile:			.asciiz "wordlistfour.txt"
 	fourBuffer:			.space 	7
 	fiveFile:			.asciiz "wordlistfive.txt"
@@ -124,6 +127,9 @@
 		syscall
 		# Continued
 		la	$a0, borderMsg
+		syscall
+		# Continued
+		la 	$a0, instructionMsg11
 		syscall
 		
 		jal	getDisplayWord				# Display Grid

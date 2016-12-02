@@ -4,12 +4,12 @@
 # The program creates a random number that represents a line in the file and
 # then the program iterates until it hits that line, and then generates another
 # random number to find a nine letter word in that line to use to create the display
-# 3x3 grid with a shuffled word. 
+# 3x3 grid with a scrambled word. 
 
 getDisplayWord:
 	
 	#generate the random number with the max bound at $a1
-	li $a1, 1#CHANGE THIS!!!!!!!!!!!!1111111
+	li $a1, 6
 	li $v0, 42
 	syscall
 		
@@ -81,7 +81,7 @@ getNineWord:
 scramble:
 
 	#close file
-	li	$v0, 16						# 16 = close file
+	li	$v0, 16				
 	add	$a0, $s3, $0	
 	syscall	
 	
@@ -115,27 +115,36 @@ scramble:
 
 #------Display Grid-------------------#
 beginDisplayGrid:
+	
+#	la $a0, displayWord
+#	li $v0, 4
+#	syscall
+	
 	li $t5,0		#clear register for index
 	li $t6,0		#clear register for array counter
 	j displayGrid
 		    
 displayGrid:
 
-	beq $t6, 0, formatNewline		#format newline and horizontal line
-	beq $t6, 3, formatNewline		#format newline and horizontal line
-	beq $t6, 6, formatNewline		#format newline and horizontal line
-	beq $t6, 9, formatNewline		#format newLIne and horizontal line
+	beq $t6, 0, formatNewline		#format new line
+	beq $t6, 3, formatNewline		#format new line
+	beq $t6, 6, formatNewline		#format new line
+	beq $t6, 9, formatNewline		#format new line
 	
 returnAgain:
-	beq $t6, 0, formatHorizline		#format newline and horizontal line
-	beq $t6, 3, formatHorizline		#format newline and horizontal line
-	beq $t6, 6, formatHorizline		#format newline and horizontal line
-	beq $t6, 9, formatHorizline		#format newLIne and horizontal line
+	beq $t6, 0, formatHorizline		#format horizontal line
+	beq $t6, 3, formatHorizline		#format horizontal line
+	beq $t6, 6, formatHorizline		#format horizontal line
+	beq $t6, 9, formatHorizline		#format horizontal line
 	
 	
 returnLabel:	
-	lb $a1, displayWord($t5)	#get first element
+	lb $a1, displayWord($t5)	#getting first element
 	addi $t5, $t5, 1		#move to next element
+	
+	li $v0, 4			#print vertical format line
+	la $a0, vertLine
+	syscall
 	
 	li $v0, 11			#printing letter
 	move $a0, $a1
@@ -155,8 +164,7 @@ formatNewline:
 	li $v0, 4
 	la $a0, emptyString
 	syscall
-	
-	#j returnLabel
+
 	j returnAgain
 	
 formatHorizline:
@@ -164,7 +172,10 @@ formatHorizline:
 	la $a0, horizLine
 	syscall
 	
-	#j returnAgain
+	li $v0, 4			#tab over
+	la $a0, tabOver
+	syscall
+	
 	j returnLabel	
 	
 endDisplay:
@@ -181,7 +192,7 @@ userInput:
 	#Read user input
 	li $v0, 8
 	la $a0, inputBuffer
-	li $a1, 15						# max 9 characters
+	li $a1, 15						
 	syscall
 
 	j validateStrLength 
